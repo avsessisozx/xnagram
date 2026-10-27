@@ -77,6 +77,12 @@ jobs:
             echo "ALIAS_PASS=$TMP_PASS" >> "$GITHUB_ENV"
             echo "kind=temporary" >> "$GITHUB_OUTPUT"
           fi
+      - name: "IMZA: KALICI anahtar kullaniliyor"
+        if: steps.signing.outputs.kind == 'stable'
+        run: echo "Kalici imza anahtari bulundu."
+      - name: "IMZA: GECICI anahtar (secret bulunamadi)"
+        if: steps.signing.outputs.kind != 'stable'
+        run: echo "Secret yok, gecici anahtar kullaniliyor."
       - name: Release Build
         id: build
         env:

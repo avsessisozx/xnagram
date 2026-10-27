@@ -128,6 +128,12 @@ public class NekoTranslatorSettingsActivity extends BaseNekoXSettingsActivity {
             getString(R.string.TranslatorWithOriginalTextManualOnly),
             getString(R.string.TranslatorWithOriginalTextOn),
     }, null));
+    private final AbstractConfigCell translateButtonModeRow = cellGroup.appendCell(new ConfigCellSelectBox(null, NaConfig.INSTANCE.getTranslateButtonMode(), new String[]{
+            getString(R.string.XnTranslateBtnDefault),
+            getString(R.string.XnTranslateBtnHeader),
+            getString(R.string.XnTranslateBtnMenu),
+            getString(R.string.XnTranslateBtnBanner),
+    }, null));
     private final AbstractConfigCell translateToLangRow = cellGroup.appendCell(new ConfigCellCustom("TranslateTo", CellGroup.ITEM_TYPE_TEXT_SETTINGS_CELL, true));
     private final AbstractConfigCell doNotTranslateRow = cellGroup.appendCell(new ConfigCellCustom("DoNotTranslate", CellGroup.ITEM_TYPE_TEXT_SETTINGS_CELL, true));
     private final AbstractConfigCell preferredTranslateTargetLangRow = cellGroup.appendCell(
@@ -603,6 +609,7 @@ public class NekoTranslatorSettingsActivity extends BaseNekoXSettingsActivity {
         cellGroup.appendCell(headerTranslation);
         cellGroup.appendCell(translationProviderRow);
         cellGroup.appendCell(translatorModeRow);
+        cellGroup.appendCell(translateButtonModeRow);
         cellGroup.appendCell(translateToLangRow);
         cellGroup.appendCell(doNotTranslateRow);
         cellGroup.appendCell(preferredTranslateTargetLangRow);

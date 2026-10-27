@@ -870,6 +870,12 @@ object NaConfig {
             ConfigItem.configTypeInt,
             0 // 0: off; 1: manual only; 2: all
         )
+    val translateButtonMode =
+        addConfig(
+            "TranslateButtonMode",
+            ConfigItem.configTypeInt,
+            1 // 0: Telegram default banner; 1: chat header button; 2: always in menu; 3: pinned banner
+        )
     val translatorModeWithOriginalMigrated =
         addConfig(
             "TranslatorModeWithOriginalMigrated",

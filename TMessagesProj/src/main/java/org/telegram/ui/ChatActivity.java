@@ -452,6 +452,7 @@ public class ChatActivity extends BaseFragment implements
     private final static int nkactionbarbtn_action_mode_other = 2002;
 
     private final static int nkheaderbtn_show_pinned = 2003;
+    private final static int nkheaderbtn_translate_toggle = 2090;
     private final static int nkheaderbtn_zibi = 2004;
     private final static int nkheaderbtn_linked_chat = 2005;
     private final static int nkheaderbtn_upgrade = 2007;
@@ -551,6 +552,7 @@ public class ChatActivity extends BaseFragment implements
     protected ActionBarMenuItem searchItem;
     protected ActionBarMenuItem topicCreateItem;
     private ActionBarMenuItem.Item translateItem;
+    private ActionBarMenuItem translateHeaderItem;
     private ActionBarMenuItem searchIconItem;
     private ActionBarMenuItem viewInChatItem;
     private ActionBarMenu.LazyItem audioCallIconItem;
@@ -4366,10 +4368,16 @@ public class ChatActivity extends BaseFragment implements
                     getSendMessagesHelper().sendMessage(SendMessagesHelper.SendMessageParams.of("/settings", dialog_id, null, null, null, false, null, null, null, true, 0, 0, null, false));
                 } else if (id == search) {
                     openSearchWithText(isSupportedTags() ? "" : null);
+                } else if (id == nkheaderbtn_translate_toggle) {
+                    toggleTranslateFromControl();
                 } else if (id == translate) {
-                    getMessagesController().getTranslateController().setHideTranslateDialog(getDialogId(), false, true);
-                    if (!getMessagesController().getTranslateController().toggleTranslatingDialog(getDialogId(), true)) {
-                        updateTopPanel(true);
+                    if (translateButtonMode() == TRANSLATE_MODE_MENU) {
+                        toggleTranslateFromControl();
+                    } else {
+                        getMessagesController().getTranslateController().setHideTranslateDialog(getDialogId(), false, true);
+                        if (!getMessagesController().getTranslateController().toggleTranslatingDialog(getDialogId(), true)) {
+                            updateTopPanel(true);
+                        }
                     }
                 } else if (id == call || id == video_call) {
                     if (currentUser != null && getParentActivity() != null) {
@@ -4745,6 +4753,10 @@ public class ChatActivity extends BaseFragment implements
             TLRPC.UserFull userFull = null;
             if (currentUser != null) {
                 userFull = getMessagesController().getUserFull(currentUser.id);
+            }
+            if (translateButtonMode() == TRANSLATE_MODE_HEADER) {
+                translateHeaderItem = menu.addItem(nkheaderbtn_translate_toggle, LlmConfig.llmIsDefaultProvider() ? R.drawable.magic_stick_solar : R.drawable.msg_translate);
+                translateHeaderItem.setContentDescription(LocaleController.getString(R.string.TranslateMessage));
             }
             headerItem = menu.addItem(chat_menu_options, otherIcon);
             headerItem.setSubMenuDelegate(new ActionBarMenuItem.ActionBarSubMenuItemDelegate() {
@@ -12052,11 +12064,50 @@ public class ChatActivity extends BaseFragment implements
         getMediaDataController().searchMessagesInChat(searchingQuery = "", dialog_id, mergeDialogId, classGuid, 0, threadMessageId, searchingUserMessages, searchingChatMessages, searchingReaction, searchingType = null);
     }
 
+    private static final int TRANSLATE_MODE_DEFAULT = 0;
+    private static final int TRANSLATE_MODE_HEADER = 1;
+    private static final int TRANSLATE_MODE_MENU = 2;
+    private static final int TRANSLATE_MODE_PINNED_BANNER = 3;
+
+    private int translateButtonMode() {
+        int mode = NaConfig.INSTANCE.getTranslateButtonMode().Int();
+        return mode >= TRANSLATE_MODE_DEFAULT && mode <= TRANSLATE_MODE_PINNED_BANNER ? mode : TRANSLATE_MODE_HEADER;
+    }
+
+    private boolean canShowTranslateControl() {
+        final long did = getDialogId();
+        return getMessagesController().getTranslateController().isFeatureAvailable()
+                && !DialogObject.isEncryptedDialog(did)
+                && getUserConfig().getClientUserId() != did;
+    }
+
+    private void toggleTranslateFromControl() {
+        final TranslateController controller = getMessagesController().getTranslateController();
+        controller.setHideTranslateDialog(getDialogId(), false, true);
+        controller.toggleTranslatingDialog(getDialogId());
+        updateTopPanel(true);
+        updateTranslateItemVisibility();
+    }
+
     private void updateTranslateItemVisibility() {
+        final int mode = translateButtonMode();
+        final TranslateController controller = getMessagesController().getTranslateController();
+        final boolean available = canShowTranslateControl();
+        final boolean translating = controller.isTranslatingDialog(getDialogId());
+        if (translateHeaderItem != null) {
+            translateHeaderItem.setVisibility(mode == TRANSLATE_MODE_HEADER && available ? View.VISIBLE : View.GONE);
+            translateHeaderItem.setAlpha(translating ? 1f : 0.55f);
+            translateHeaderItem.setContentDescription(LocaleController.getString(translating ? R.string.ShowOriginalButton : R.string.TranslateMessage));
+        }
         if (translateItem == null) {
             return;
         }
-        translateItem.setVisibility(getMessagesController().getTranslateController().isTranslateDialogHidden(getDialogId())/* && getMessagesController().getTranslateController().isDialogTranslatable(getDialogId())*/ ? View.VISIBLE : View.GONE);
+        if (mode == TRANSLATE_MODE_MENU) {
+            translateItem.setVisibility(available ? View.VISIBLE : View.GONE);
+            translateItem.setText(LocaleController.getString(translating ? R.string.ShowOriginalButton : R.string.TranslateMessage));
+            return;
+        }
+        translateItem.setVisibility(mode == TRANSLATE_MODE_DEFAULT && controller.isTranslateDialogHidden(getDialogId()) ? View.VISIBLE : View.GONE);
     }
 
     private Animator infoTopViewAnimator;
@@ -30535,6 +30586,8 @@ public class ChatActivity extends BaseFragment implements
 
         boolean showRestartTopic = !isInPreviewMode() && forumTopic != null && forumTopic.closed && !forumTopic.hidden && ChatObject.canManageTopic(currentAccount, currentChat, forumTopic);
         boolean showTranslate = (
+            translateButtonMode() == TRANSLATE_MODE_PINNED_BANNER ? canShowTranslateControl() :
+            translateButtonMode() != TRANSLATE_MODE_DEFAULT ? false :
             true /*getUserConfig().isPremium()*/ ?
                 getMessagesController().getTranslateController().isDialogTranslatable(getDialogId()) && !getMessagesController().getTranslateController().isTranslateDialogHidden(getDialogId()) :
                 !getMessagesController().premiumFeaturesBlocked() && preferences.getInt("dialog_show_translate_count" + did, 5) <= 0

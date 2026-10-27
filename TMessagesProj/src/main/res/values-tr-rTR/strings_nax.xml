@@ -334,4 +334,9 @@
     <string name="XnUpdateAvailable">Yeni sürüm var</string>
     <string name="XnUpdateDownload">İndir</string>
     <string name="XnUpdateLater">Sonra</string>
+    <string name="TranslateButtonMode">Çeviri butonu</string>
+    <string name="XnTranslateBtnDefault">Telegram varsayılanı (banner)</string>
+    <string name="XnTranslateBtnHeader">Sohbet üst çubuğunda buton</string>
+    <string name="XnTranslateBtnMenu">Her zaman ⋮ menüsünde</string>
+    <string name="XnTranslateBtnBanner">Sabit banner</string>
 </resources>

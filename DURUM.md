@@ -1,6 +1,6 @@
 # xnagram DURUM (durum dalı, main'de yok)
 
-Son güncelleme: 2026-10-27 · Aşama 0 (inceleme) tamam, kod değişikliği yok.
+Son güncelleme: 2026-10-27 · Aşama 0 tamam; kod `gelistirme` dalında (henüz main'e alınmadı, henüz derleme sonucu doğrulanmadı).
 
 ## Proje
 - Fork: avsessisozx/xnagram ← risin42/NagramX (upstream 23.08.2026'da arşivlendi, son sürüm 12.9.2.1258).
@@ -36,3 +36,10 @@ Son güncelleme: 2026-10-27 · Aşama 0 (inceleme) tamam, kod değişikliği yok
 
 ## Bilinen hatalar
 - Yok (kod değişmedi).
+
+## Yapılanlar (gelistirme dalı, doğrulanmadı: CI/telefon testi bekliyor)
+- Paket adı com.avsessisozx.xnagram, uygulama adı XNagram, google-services.json'a bu paket için girdi eklendi (FCM push bizim için çalışmaz; kendi Firebase projesi gerekir).
+- GithubUpdateHelper: son GitHub sürümünü okur, etiket `v<versionCode>` (örn. v1262), basit dialog + APK'yı tarayıcıyla indirir. Eski Telegram-kanalı UpdateHelper'ı artık LaunchActivity'den çağrılmıyor.
+- CI: release.yml → arm64 APK, GitHub Release (sadece main + kalıcı imza varsa). Gizli: XN_KEYSTORE_B64, XN_KEYSTORE_PASS, XN_KEY_ALIAS, XN_KEY_PASS yoksa geçici imzayla yalnızca artifact üretir.
+- Çeviri butonu: ayar `TranslateButtonMode` (0 varsayılan banner, 1 üst çubuk ikonu [varsayılan], 2 ⋮ menüsü, 3 sabit banner). Ayar yeri: Çeviri ayarları.
+- Bilinen: verCode build.gradle'da elle (şu an 1261), her sürümde artırılmalı.

@@ -331,4 +331,7 @@
     <string name="TabletModeOn">Açık</string>
     <string name="TabletModeOff">Kapalı</string>
     <string name="HideDialogsSearchField">Arama Kutusunu Gizle</string>
+    <string name="XnUpdateAvailable">Yeni sürüm var</string>
+    <string name="XnUpdateDownload">İndir</string>
+    <string name="XnUpdateLater">Sonra</string>
 </resources>

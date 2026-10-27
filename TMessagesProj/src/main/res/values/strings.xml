@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">Nagram X</string>
+    <string name="AppName">XNagram</string>
     <string name="AppNameBeta">Telegram Beta</string>
     <string name="LanguageName">English</string>
     <string name="English">English</string>
@@ -11226,4 +11226,7 @@
     <string name="UnsupportedMessageTitle">Unsupported Message</string>
     <string name="UnsupportedMessageMessage">Update Telegram to view this message</string>
     <string name="UnsupportedUpdate">Update</string>
+    <string name="XnUpdateAvailable">New version available</string>
+    <string name="XnUpdateDownload">Download</string>
+    <string name="XnUpdateLater">Later</string>
 </resources>

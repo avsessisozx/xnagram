@@ -1,6 +1,6 @@
 # xnagram DURUM (durum dalı, main'de yok)
 
-Son güncelleme: 2026-10-27 · Aşama 0 tamam; kod `gelistirme` dalında (henüz main'e alınmadı, henüz derleme sonucu doğrulanmadı).
+Son güncelleme: 2026-10-27 · Aşama 0 tamam; kod `gelistirme` dalında (henüz main'e alınmadı).
 
 ## Proje
 - Fork: avsessisozx/xnagram ← risin42/NagramX (upstream 23.08.2026'da arşivlendi, son sürüm 12.9.2.1258).
@@ -43,3 +43,13 @@ Son güncelleme: 2026-10-27 · Aşama 0 tamam; kod `gelistirme` dalında (henüz
 - CI: release.yml → arm64 APK, GitHub Release (sadece main + kalıcı imza varsa). Gizli: XN_KEYSTORE_B64, XN_KEYSTORE_PASS, XN_KEY_ALIAS, XN_KEY_PASS yoksa geçici imzayla yalnızca artifact üretir.
 - Çeviri butonu: ayar `TranslateButtonMode` (0 varsayılan banner, 1 üst çubuk ikonu [varsayılan], 2 ⋮ menüsü, 3 sabit banner). Ayar yeri: Çeviri ayarları.
 - Bilinen: verCode build.gradle'da elle (şu an 1261), her sürümde artırılmalı.
+
+## Doğrulama durumu (2026-10-27 akşam)
+Doğrulandı:
+- CI derlemesi geçiyor (arm64, geçici imza). Test APK: release `test-3` (prerelease).
+- APK telefona kuruldu (com.avsessisozx.xnagram 12.10.0-6e9e74e, kod 1261), NagramX'in yanında; açılışta çökme yok (logcat). Crashlytics/analitik kapalı (manifest + runtime).
+Doğrulanmadı (hesap girişi gerekiyor, kullanıcı giriş yapmadan test edilemez):
+- Çeviri butonu (4 mod) sohbette gerçekten çalışıyor mu, simge/alpha durumu.
+- Güncelleme kontrolü (GitHub sürümü) ve dialog; henüz yayınlanmış `v<kod>` sürümü yok.
+- Push bildirimi: FCM upstream projesine ait, bizim paket için çalışmaz.
+Not: Test derlemeleri her seferinde yeni geçici anahtarla imzalanır; birbirinin üstüne kurulmaz. Kalıcı anahtar kullanıcıya verildi (XN_* secrets); eklenince main'e push = GitHub Release.

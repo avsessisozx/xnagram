@@ -99,3 +99,11 @@ jobs:
           if [ -f RELEASE_NOTES.md ]; then NOTES=RELEASE_NOTES.md; else echo "XNagram $VERNAME" > /tmp/notes.md; NOTES=/tmp/notes.md; fi
           gh release create "v$VERCODE" TMessagesProj/build/outputs/apk/release/*-arm64-v8a.apk \
             --title "XNagram $VERNAME ($VERCODE)" --notes-file "$NOTES" --target "$GITHUB_SHA"
+      - name: Publish test pre-release
+        if: github.ref == 'refs/heads/gelistirme'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "test-${{ github.run_number }}" TMessagesProj/build/outputs/apk/release/*-arm64-v8a.apk \
+            --prerelease --title "Test build ${{ github.run_number }}" \
+            --notes "Gecici imzali test derlemesi, gunluk kullanim icin degil." --target "$GITHUB_SHA"

@@ -22,17 +22,19 @@ public class NekoAboutActivity extends BaseNekoSettingsActivity {
     private int channelTipsRow;
     private int sourceCodeRow;
     private int translationRow;
+    private int releasesRow;
     private int datacenterStatusRow;
 
     @Override
     protected void updateRows() {
         super.updateRows();
 
-        xChannelRow = addRow();
-        channelRow = addRow();
-        channelTipsRow = addRow();
+        xChannelRow = -1;
+        channelRow = -1;
+        channelTipsRow = -1;
+        translationRow = -1;
         sourceCodeRow = addRow();
-        translationRow = addRow();
+        releasesRow = addRow();
         datacenterStatusRow = addRow();
     }
 
@@ -52,7 +54,9 @@ public class NekoAboutActivity extends BaseNekoSettingsActivity {
         } else if (position == translationRow) {
             Browser.openUrl(getParentActivity(), "https://crowdin.com/project/NagramX");
         } else if (position == sourceCodeRow) {
-            Browser.openUrl(getParentActivity(), "https://github.com/risin42/NagramX");
+            Browser.openUrl(getParentActivity(), "https://github.com/avsessisozx/xnagram");
+        } else if (position == releasesRow) {
+            Browser.openUrl(getParentActivity(), "https://github.com/avsessisozx/xnagram/releases");
         } else if (position == datacenterStatusRow) {
             presentFragment(new DatacenterActivity(0));
         }
@@ -81,8 +85,8 @@ public class NekoAboutActivity extends BaseNekoSettingsActivity {
                     textCell.setTextAndValue(getString(R.string.TipsChannel), "@" + "NagramTips", true);
                 } else if (position == sourceCodeRow) {
                     textCell.setTextAndValue(getString(R.string.SourceCode), "Github", true);
-                } else if (position == translationRow) {
-                    textCell.setTextAndValue(getString(R.string.TransSite), "Crowdin", true);
+                } else if (position == releasesRow) {
+                    textCell.setTextAndValue(getString(R.string.XnReleases), "Github", true);
                 } else if (position == datacenterStatusRow) {
                     textCell.setText(getString(R.string.DatacenterStatus), false);
                 }

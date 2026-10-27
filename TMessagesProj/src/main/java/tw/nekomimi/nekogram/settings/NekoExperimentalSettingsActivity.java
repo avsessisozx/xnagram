@@ -195,6 +195,13 @@ public class NekoExperimentalSettingsActivity extends BaseNekoXSettingsActivity 
     private final AbstractConfigCell dividerPangu = cellGroup.appendCell(new ConfigCellDivider());
 
     public NekoExperimentalSettingsActivity() {
+        // XNagram: message-saving features are intentionally not offered (account safety).
+        NaConfig.INSTANCE.getEnableSaveDeletedMessages().setConfigBool(false);
+        NaConfig.INSTANCE.getEnableSaveEditsHistory().setConfigBool(false);
+        cellGroup.rows.removeAll(Arrays.asList(
+                enableSaveDeletedMessagesRow, enableSaveEditsHistoryRow, messageSavingSaveMediaRow,
+                saveDeletedMessageForBotsUserRow, saveDeletedMessageInBotChatRow,
+                translucentDeletedMessagesRow, useDeletedIconRow, customDeletedMarkRow));
         if (NaConfig.INSTANCE.getUseDeletedIcon().Bool()) {
             cellGroup.rows.remove(customDeletedMarkRow);
         }

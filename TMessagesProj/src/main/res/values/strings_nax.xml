@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NagramX" translatable="false">Nagram X</string>
+    <string name="NagramX" translatable="false">XNagram</string>
     <string name="XChannel">Nagram X Channel</string>
     <string name="EnableSaveDeletedMessages">Save Deleted Messages</string>
     <string name="DeletedMessage">deleted</string>
@@ -359,4 +359,5 @@
     <string name="XnTranslateBtnHeader">Button in chat header</string>
     <string name="XnTranslateBtnMenu">Always in the ⋮ menu</string>
     <string name="XnTranslateBtnBanner">Pinned banner</string>
+    <string name="XnReleases">Releases</string>
 </resources>

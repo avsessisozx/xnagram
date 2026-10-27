@@ -53,3 +53,9 @@ Doğrulanmadı (hesap girişi gerekiyor, kullanıcı giriş yapmadan test edilem
 - Güncelleme kontrolü (GitHub sürümü) ve dialog; henüz yayınlanmış `v<kod>` sürümü yok.
 - Push bildirimi: FCM upstream projesine ait, bizim paket için çalışmaz.
 Not: Test derlemeleri her seferinde yeni geçici anahtarla imzalanır; birbirinin üstüne kurulmaz. Kalıcı anahtar kullanıcıya verildi (XN_* secrets); eklenince main'e push = GitHub Release.
+
+## Surum v1261 (2026-10-27)
+Yayinlandi: GitHub Release v1261 (main, kalici imza, arm64 APK). CI gecti.
+Dogrulandi: kalici anahtarla derleme; Release olustu; silinen mesaj kaydetme ayarlari gizlendi + kapaliya zorlandi (kodda, cihazda denenmedi).
+Dogrulanmadi: ceviri butonu (giris gerekir), GitHub guncelleme dialogu (daha yeni surum yok), push bildirimi (calismaz).
+Yapilacak: test-N on-surumlerini sil, 2. surum (Telegram taban yamalari).

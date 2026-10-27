@@ -17,6 +17,11 @@ Son güncelleme: 2026-10-27 · Aşama 0 (inceleme) tamam, kod değişikliği yok
 - Repoda `TMessagesProj/release.keystore` ve `google-services.json` upstream'den gelmiş. Bizim kendi anahtarımızla değiştirilmeli.
 - Submodule'ler (ffmpeg, libvpx, dav1d, opus vb.) shallow clone'da boş; CI `submodules: recursive` ile çekiyor.
 
+## Derleme ortamı (doğrulandı)
+- Bu oturumun sandbox'ında Android SDK/Gradle/Google Maven indirilemiyor (dl.google.com, services.gradle.org, maven.google.com engelli; 2 CPU, 7 GB RAM). Yerelde derleme burada MÜMKÜN DEĞİL; derleme GitHub Actions'ta yapılacak.
+- `gh api .../actions/runs` okunabiliyor (CI sonuçları izlenebilir). Actions secrets bu oturumdan okunamıyor/yazılamıyor (proxy 403): secrets'ı kullanıcı GitHub'dan eklemeli.
+- build.gradle varsayılan API ID'si 6 (resmi Telegram Android'in herkese açık ID'si). Kendi ID/hash'imiz gelene kadar bununla test edilebilir.
+
 ## Doğrulanmadı
 - Derleme henüz denenmedi (NDK 27.2, JDK 21, nasm gerekli).
 - Telegram taban sürümünün (12.9.2) üstünde güncel upstream Telegram değişiklikleri incelenmedi.

@@ -56,7 +56,7 @@ public class CrashReporter {
         sb.append("Cihaz: ").append(Build.MANUFACTURER).append(' ').append(Build.MODEL)
                 .append(" Android ").append(Build.VERSION.RELEASE).append(" (SDK ").append(Build.VERSION.SDK_INT).append(")\n");
         sb.append("ABI: ").append(Build.SUPPORTED_ABIS[0]).append("\n");
-        sb.append("Surum: ").append(BuildVars.BUILD_VERSION_STRING).append(" / ").append(BuildVars.BUILD_VERSION).append("\n\n");
+        sb.append("Surum: ").append(BuildVars.BUILD_VERSION_STRING).append("\n\n");
 
         if (Build.VERSION.SDK_INT >= 30) {
             ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);

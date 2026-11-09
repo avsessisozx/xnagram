@@ -1,0 +1,113 @@
+name: Emulator Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Gradle Build
+    runs-on: ubuntu-latest
+    env:
+      NATIVE_TARGET: "x86_64"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          submodules: recursive
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Set up Android SDK Tools
+        uses: android-actions/setup-android@v4
+        with:
+          packages: "build-tools;36.0.0 ndk;27.2.12479018 platforms;android-36"
+      - name: Install Native Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes nasm
+      - name: Configure Android SDK Path
+        run: |
+          echo "sdk.dir=${ANDROID_HOME}" >> local.properties
+      - name: Modify Gradle JVM Args
+        run: |
+          MEMORY_KB=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
+          MEMORY_GB=$((MEMORY_KB / 1024 / 1024))
+          echo "Detected memory size: ${MEMORY_GB}GB"
+          if [ $MEMORY_GB -ge 12 ]; then
+            sed -i '/^org\.gradle\.jvmargs=/d' gradle.properties
+            echo "org.gradle.jvmargs=-Xmx8G -XX:MaxMetaspaceSize=2G -XX:+UseParallelGC -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> gradle.properties
+          fi
+      - name: Prepare signing
+        id: signing
+        env:
+          XN_KEYSTORE_B64: ${{ secrets.XN_KEYSTORE_B64 }}
+          XN_KEYSTORE_PASS: ${{ secrets.XN_KEYSTORE_PASS }}
+          XN_KEY_ALIAS: ${{ secrets.XN_KEY_ALIAS }}
+          XN_KEY_PASS: ${{ secrets.XN_KEY_PASS }}
+        run: |
+          KS=TMessagesProj/release.keystore
+          if [ -n "$XN_KEYSTORE_B64" ]; then
+            echo "$XN_KEYSTORE_B64" | base64 -d > "$KS"
+            echo "KEYSTORE_PASS=$XN_KEYSTORE_PASS" >> "$GITHUB_ENV"
+            echo "ALIAS_NAME=$XN_KEY_ALIAS" >> "$GITHUB_ENV"
+            echo "ALIAS_PASS=$XN_KEY_PASS" >> "$GITHUB_ENV"
+            echo "kind=stable" >> "$GITHUB_OUTPUT"
+          else
+            # Throwaway key for test builds only: APKs signed with it cannot be updated by a later stable build.
+            TMP_PASS=$(openssl rand -hex 16)
+            keytool -genkeypair -keystore "$KS" -storepass "$TMP_PASS" -keypass "$TMP_PASS" \
+              -alias xntemp -keyalg RSA -keysize 2048 -validity 3650 -dname "CN=XNagram test"
+            echo "KEYSTORE_PASS=$TMP_PASS" >> "$GITHUB_ENV"
+            echo "ALIAS_NAME=xntemp" >> "$GITHUB_ENV"
+            echo "ALIAS_PASS=$TMP_PASS" >> "$GITHUB_ENV"
+            echo "kind=temporary" >> "$GITHUB_OUTPUT"
+          fi
+      - name: "IMZA: KALICI anahtar kullaniliyor"
+        if: steps.signing.outputs.kind == 'stable'
+        run: echo "Kalici imza anahtari bulundu."
+      - name: "IMZA: GECICI anahtar (secret bulunamadi)"
+        if: steps.signing.outputs.kind != 'stable'
+        run: echo "Secret yok, gecici anahtar kullaniliyor."
+      - name: Prefetch Gradle (retry on download errors)
+        run: |
+          for i in 1 2 3 4 5 6; do
+            ./gradlew help --no-daemon && exit 0
+            echo "Gradle indirme hatasi, tekrar deneniyor ($i)"; sleep 30
+          done
+          exit 1
+      - name: Build x86_64 release APK
+        env:
+          COMMIT_ID: ${{ github.sha }}
+        run: |
+          export BUILD_TIMESTAMP=$(date +%s)
+          ./gradlew TMessagesProj:assembleRelease
+          ls -la TMessagesProj/build/outputs/apk/release/
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run on emulator and capture logs
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          script: bash .github/scripts/emu_test.sh
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: emulator-logs
+          path: emu_logs/

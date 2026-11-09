@@ -18,6 +18,7 @@ echo "=== APP PID LOG ($PID) ==="; adb logcat -d --pid=$PID | cut -c1-300 | grep
 echo "=== TOP ACTIVITY ==="; adb shell dumpsys activity activities | grep -E "topResumedActivity|ResumedActivity" | head -3
 echo "=== UI TEXT ==="; adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1; adb shell cat /sdcard/ui.xml | grep -oE 'text="[^"]+"' | head -20
 echo "=== libs in apk ==="; unzip -l "$APK" | grep -E "\.so$" | awk '{print $4}' | head -30
+echo "=== EMOJI PACK STORAGE ==="; unzip -v "$APK" | grep -E "emoji.pack"
 echo "=== CRASH REPORTER TEST ==="
 adb shell am crash $PKG
 sleep 3

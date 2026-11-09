@@ -87,3 +87,21 @@ Yapilacak: test-N on-surumlerini sil, 2. surum (Telegram taban yamalari).
 - Açık: APK ~7,5 MB büyüdü (önceki test sürümleri ~50,9 MB), nedeni araştırılmadı. verCode 1262; main'e almadan 1263 yapılmalı. .github/scripts/__pycache__ yanlışlıkla commit'e girdi, silinecek.
 - Giriş/emoji.pack: EmojiPack.java 13.2.1 ile yeni; sıkıştırılmış asset'te openFd hata verir, statik başlatma hatası Emoji.java:166'daki catch(Exception) ile yakalanmaz. Düzeltme 33a6ebd2 (noCompress); CI'da emoji.pack Stored. LoginActivity'de Nagram bağlantıları v1261 ile aynı (17). CI derlemesi APP_ID 6 kullanıyor (build.gradle:143), kendi API ID'miz yok.
 - Devam noktası: sırada (1) APK boyut farkı, (2) kaybolan Nagram özellikleri tek tek (ChatActivity yazı biçimi menüsü, profil adı kopyalama, blur arka planlar, ses bitrate yaması, proxy sıfırlama), (3) girişi kullanıcı hesabıyla bir kez deneme.
+
+
+## 2026-11-09 gece · Bütünlük denetimi (okuma) + dil eşleşmesi düzeltmesi (gelistirme, commit 2d59e0d6; ön sürüm test-30)
+- Dil düzeltmesi: uygulama Türkçe için Locale("tr") kullanıyor, çeviri values-tr-rTR'de idi; LocalizationUtils "tr"yi bulamıyordu (Nagram ayarları İngilizce). GenerateLocalizationUtilsJavaTask artık dil-sadece yerel ayarı ilk bölge etiketine yönlendiriyor; TelegramStringsTask values-es-rES gibi bölge dosyalarını düz dil dosyasına da ekliyor. CI (gerçek APK, yerel ayar simülasyonu): tr→localization_tr_tr.bin 712/712, es 2005, pt→pt-BR 1946, ru, ja, zh tamam; emülatör: çökme yok, LOC_ERR yok. Doğrulanmadı: giriş yapılmış uygulamada ekran görüntüsü.
+- Denetim yöntemi: resmî 12.10.0 (4e1a61eca6c9) ile v1261 farkı = Nagram yaması (596 değiştirilmiş + 1093 eklenmiş dosya); her eklenen satır ve ayar kullanımı güncel sürümde (resmî 13.2.1, 7be672ea) aranıyor. Eklenen Nagram dosyalarından yalnız gradle-daemon-jvm.properties eksik (önemsiz). Hiçbir Nagram ayarının kullanımı tamamen sıfırlanmamış (1228→1223 kullanım).
+- KANITLI KAYIPLAR (v1261'de var, güncelde yok):
+  1. ChatActivity metin seçim menüsü: kod/bahsetme/çeviri girişleri (v1261 satır 1801, 4414; text_mention 3→0). EditTextCaption'daki makeSelected* yöntemleri duruyor ama menüden çağrılmıyor.
+  2. ProfileActivity: isme uzun basıp kopyalama (v1261 L5846) ve kendi emoji durumunu gösterme.
+  3. QrActivity silindi (resmî kaldırdı); new QrActivity 7→0; TelegramQRCodeWriter'daki Nagram QR stili (23 satır) gitti.
+  4. ProxyListActivity: "aramalar için proxy" seçeneği (useProxyForCalls, proxy_enabled_calls) tamamen yok (resmî de kaldırmış).
+  5. Sesli arama özel bitrate: Instance.cpp L492 ve webrtc_voice_engine.cc L1151 yamaları yok; ayar arayüzde var, etkisi yok.
+  6. BlurredBackgroundDrawable: StrokeOnViews ayarı 4 yerden 1'inde kaldı (v1261 L391); ProfileMusicView getDisableAvatarBlur 1 yer eksik (L108).
+  7. LocaleController.fixContextLocale (Android kaynak dili) yok (v1261 L4595). CodeHighlighting thread-safety yaması (synchronized) yeni konumda yok (v1261 L223). VoIPController log yolu yaması yok. ExoPlayer WAV yamaları (media3'e geçildi) büyük olasılıkla yok, doğrulanmadı.
+  8. MainTabsHelper kullanımı 75→65 (ContactsActivity, CallLogActivity, SettingsActivity, ProfileActivity): alt sekme boşluğu/yüksekliği ayarı bu ekranlarda uygulanmıyor olabilir, kontrol edilmeli.
+  9. Görsel: blur3 arka planlar (BookmarkManagerActivity, NekoDelegateFragment) düz kaynağa döndü. SettingsActivity: "yeniden başlat" UndoView yok.
+- Yanlış alarm çıkanlar (kayıp DEĞİL, resmî başka dosyaya taşımış ve Nagram yaması taşınmış): anket çevirisi (ChatMessagePoll), webp belge açma (ChatMessageLinkPreview), yükleme hızlandırma (FileUploadOperation, uploadBoost), güncelleme denetimi (GithubUpdateHelper), emoji paketi seçimi (Emoji.java).
+- Açık: APK ~58,4 MB (önceki ~50,9 MB), nedeni bilinmiyor. verCode 1262 → main'e almadan 1263. Giriş/SMS, kanal sorunu doğrulanmadı.
+- Devam noktası: kayıpları önem sırasıyla geri getirmek için kullanıcıdan plan onayı bekleniyor; sıra: 1 (metin menüsü), 2 (profil), 5 (bitrate native), 4 (proxy aramalar), 6-8, 3. Hiçbiri henüz yapılmadı.

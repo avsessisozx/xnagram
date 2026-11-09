@@ -105,3 +105,11 @@ Yapilacak: test-N on-surumlerini sil, 2. surum (Telegram taban yamalari).
 - Yanlış alarm çıkanlar (kayıp DEĞİL, resmî başka dosyaya taşımış ve Nagram yaması taşınmış): anket çevirisi (ChatMessagePoll), webp belge açma (ChatMessageLinkPreview), yükleme hızlandırma (FileUploadOperation, uploadBoost), güncelleme denetimi (GithubUpdateHelper), emoji paketi seçimi (Emoji.java).
 - Açık: APK ~58,4 MB (önceki ~50,9 MB), nedeni bilinmiyor. verCode 1262 → main'e almadan 1263. Giriş/SMS, kanal sorunu doğrulanmadı.
 - Devam noktası: kayıpları önem sırasıyla geri getirmek için kullanıcıdan plan onayı bekleniyor; sıra: 1 (metin menüsü), 2 (profil), 5 (bitrate native), 4 (proxy aramalar), 6-8, 3. Hiçbiri henüz yapılmadı.
+
+## Kayıp Nagram özelliklerini geri getirme (test-31, e4b5c254)
+- Kayıp 1 (metin seçim menüsü kod/bahsetme/çeviri): YANLIŞ ALARM. Menü 13.2.1'de R.id.menu_* ile zaten var (ChatActivity ~29829). Değişiklik yok.
+- Kayıp 2: isme uzun basınca kopyalama GERİ EKLENDİ (ProfileActivity). Kendi emoji durumu zaten duruyor.
+- Kayıp 4 (aramalar için proxy): Nagram değil, RESMİ özellikti; resmî 13.2.1 kaldırmış. Geri eklenmedi.
+- Kayıp 6-8: fixContextLocale artık gereksiz (yeni yazı sistemi), CodeHighlighting synchronized var, ProfileMusicView var, StrokeOnViews kancası var. Eksik yok.
+- AÇIK: Kayıp 5 (arama ses bitrate native yaması; tgcalls alt modül oldu, GroupInstanceCustomImpl yok, derleyip deneyemiyoruz) ve Kayıp 3 (Nagram QR stili; QrActivity resmî tarafça kaldırıldı).
+- CI: Release Build + Emulator Test başarılı. verCode hâlâ 1262 (main sürümünden önce 1263 yapılmalı).

@@ -14,3 +14,4 @@ echo "=== FATAL / signal ===" ; grep -nE "FATAL EXCEPTION|AndroidRuntime|Fatal s
 echo "=== focused window ===" ; adb shell dumpsys window | grep -E "mCurrentFocus" | head -2
 adb exec-out screencap -p > emu_logs/screen.png
 exit 0
+# retry

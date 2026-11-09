@@ -29,3 +29,4 @@ adb shell ls -la /sdcard/Download/ | head
 adb shell cat /sdcard/Download/XNagram-hata-raporu.txt | head -40 | cut -c1-200
 adb logcat -d | grep -i "CrashReporter" | head
 exit 0
+# t

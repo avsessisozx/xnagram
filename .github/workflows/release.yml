@@ -97,6 +97,15 @@ jobs:
         run: |
           export BUILD_TIMESTAMP=$(date +%s)
           ./gradlew TMessagesProj:assembleRelease
+      - name: Verify localization tables in APK (fails the build on LOC_ERR risk)
+        run: |
+          APK=$(ls TMessagesProj/build/outputs/apk/release/*-arm64-v8a.apk | head -1)
+          python3 .github/scripts/verify_localization.py "$APK" TMessagesProj/src/main/res
+      - name: Verify app label in APK
+        run: |
+          APK=$(ls TMessagesProj/build/outputs/apk/release/*-arm64-v8a.apk | head -1)
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging "$APK" | grep -E "^(package|application-label)" | tee /tmp/badging.txt
+          grep -q "application-label:'XNagram'" /tmp/badging.txt
       - name: Upload arm64-v8a Artifact
         uses: actions/upload-artifact@v7
         with:

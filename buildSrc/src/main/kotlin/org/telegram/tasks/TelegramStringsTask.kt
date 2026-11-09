@@ -25,9 +25,14 @@ import java.nio.charset.StandardCharsets
 abstract class TelegramStringsTask : DefaultTask() {
 
     companion object {
+        // Strings referenced directly from AndroidManifest.xml / res/xml must keep their
+        // real resource, so they are not force-discarded by the resource shrinker.
         private val GENERATED_EXCLUSIONS = setOf(
             "AppName",
-            "AppNameBeta"
+            "AppNameBeta",
+            "NagramX",
+            "SettingsNax",
+            "AccountSettingsNax"
         )
 
         private val STABLE_IDS_EXCLUSIONS = setOf(
@@ -83,7 +88,8 @@ abstract class TelegramStringsTask : DefaultTask() {
 
         // The plugin runs on the application now, so the default localization
         // is composed from two values/strings.xml files.
-        val defaultLocalizationFiles = stringsXml.files.toList()
+        // Sorted so strings.xml always comes before the XNagram strings_*.xml files.
+        val defaultLocalizationFiles = stringsXml.files.sortedBy { it.absolutePath }
 
 
         // Union of all string resources defined in all localizations.
@@ -96,7 +102,7 @@ abstract class TelegramStringsTask : DefaultTask() {
             )
         }
 
-        val localizationInputFiles = localizationFiles.files.toList()
+        val localizationInputFiles = localizationFiles.files.sortedBy { it.absolutePath }
 
         for (file in localizationInputFiles) {
             collectStrings(

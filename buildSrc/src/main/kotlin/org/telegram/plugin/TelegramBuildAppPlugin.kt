@@ -24,21 +24,23 @@ class TelegramBuildAppPlugin : Plugin<Project> {
             val task = project.tasks.register<TelegramStringsTask>(
                 "generate${suffix}TelegramStrings"
             ) {
+                // XNagram: Nagram's own string files (strings_na/nax/neko.xml) must be part
+                // of the localization tables too, otherwise they show up as LOC_ERR.
                 stringsXml.from(
                     telegramModule.fileTree("src/main/res/values") {
-                        include("strings.xml")
+                        include("strings*.xml")
                     },
                     project.fileTree("src/main/res/values") {
-                        include("strings.xml")
+                        include("strings*.xml")
                     }
                 )
 
                 localizationFiles.from(
                     telegramModule.fileTree("src/main/res") {
-                        include("values-*/strings.xml")
+                        include("values-*/strings*.xml")
                     },
                     project.fileTree("src/main/res") {
-                        include("values-*/strings.xml")
+                        include("values-*/strings*.xml")
                     }
                 )
 

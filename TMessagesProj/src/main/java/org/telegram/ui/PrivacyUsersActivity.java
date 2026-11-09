@@ -31,6 +31,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBarMenu;
+import org.telegram.ui.ActionBar.SimpleActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -201,7 +202,7 @@ public class PrivacyUsersActivity extends BaseFragment implements NotificationCe
         });
 
         if (blockedUsersActivity) {
-            ActionBarMenu menu = simpleActionBar.createMenu();
+            SimpleActionBarMenu menu = simpleActionBar.createMenu();
             ActionBarMenuItem otherItem = menu.addItem(0, R.drawable.ic_ab_other);
             otherItem.setContentDescription(getString(R.string.AccDescrMoreOptions));
             otherItem.addSubItem(unblockAll, getString(R.string.UnblockAll));

@@ -247,6 +247,9 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             }
         };
         Bulletin.addDelegate(this, delegate);
+        if (listView.adapter != null) {
+            listView.adapter.update(false);
+        }
     }
 
     @Override
@@ -644,14 +647,6 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             actionBarVisibleAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
             actionBarVisibleAnimator.setDuration(420);
             actionBarVisibleAnimator.start();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (listView.adapter != null) {
-            listView.adapter.update(false);
         }
     }
 

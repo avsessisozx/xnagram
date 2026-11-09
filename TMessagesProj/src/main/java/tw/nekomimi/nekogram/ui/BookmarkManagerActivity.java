@@ -57,13 +57,9 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
 import org.telegram.ui.Components.ViewPagerFixed;
 import org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory;
-import org.telegram.ui.Components.blur3.DownscaleScrollableNoiseSuppressor;
-import org.telegram.ui.Components.blur3.ViewGroupPartRenderer;
-import org.telegram.ui.Components.blur3.capture.IBlur3Capture;
 import org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable;
 import org.telegram.ui.Components.blur3.drawable.color.impl.BlurredBackgroundProviderImpl;
-import org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceColor;
-import org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceRenderNode;
+import org.telegram.utils.glass.source.GlassSourceColor;
 import org.telegram.ui.Components.chat.ViewPositionWatcher;
 import org.telegram.ui.SearchTabsAndFiltersLayout;
 
@@ -116,18 +112,9 @@ public class BookmarkManagerActivity extends BaseFragment {
     private int startedTrackingX;
     private int startedTrackingY;
     private VelocityTracker velocityTracker;
-    private final BlurredBackgroundSourceColor tabsBackgroundSourceColor;
-    private final BlurredBackgroundSourceRenderNode tabsBackgroundSourceFrosted;
-    private final BlurredBackgroundSourceRenderNode tabsBackgroundSourceGlass;
+    private final GlassSourceColor tabsBackgroundSourceColor;
     private final BlurredBackgroundDrawableViewFactory tabsBackgroundDrawableFactory;
     private ViewPositionWatcher tabsViewPositionWatcher;
-
-    private final DownscaleScrollableNoiseSuppressor scrollableViewNoiseSuppressor;
-    private IBlur3Capture blur3Capture;
-    private boolean blur3Invalidated;
-    private final ArrayList<RectF> blur3Positions = new ArrayList<>();
-    private final RectF blur3PositionActionBar = new RectF();
-    private final RectF blur3PositionTabs = new RectF();
 
     private int getTopContentOffset() {
         if (actionBar == null) {
@@ -136,42 +123,11 @@ public class BookmarkManagerActivity extends BaseFragment {
         return ActionBar.getCurrentActionBarHeight() + (actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0);
     }
 
-    private void updateBlur3Capture() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || scrollableViewNoiseSuppressor == null || viewPages == null) {
-            blur3Capture = null;
-            return;
-        }
-        blur3Capture = viewPages[0].blur3Capture;
-    }
-
     public BookmarkManagerActivity() {
         super();
 
-        tabsBackgroundSourceColor = new BlurredBackgroundSourceColor();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            scrollableViewNoiseSuppressor = new DownscaleScrollableNoiseSuppressor();
-            tabsBackgroundSourceFrosted = new BlurredBackgroundSourceRenderNode(tabsBackgroundSourceColor);
-            tabsBackgroundSourceFrosted.setScrollableNoiseSuppressor(scrollableViewNoiseSuppressor, DownscaleScrollableNoiseSuppressor.DRAW_FROSTED_GLASS);
-            tabsBackgroundSourceFrosted.setUnderSource(tabsBackgroundSourceColor);
-
-            if (LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS)) {
-                tabsBackgroundSourceGlass = new BlurredBackgroundSourceRenderNode(tabsBackgroundSourceColor);
-                tabsBackgroundSourceGlass.setScrollableNoiseSuppressor(scrollableViewNoiseSuppressor, DownscaleScrollableNoiseSuppressor.DRAW_GLASS);
-                tabsBackgroundSourceGlass.setUnderSource(tabsBackgroundSourceColor);
-                tabsBackgroundDrawableFactory = new BlurredBackgroundDrawableViewFactory(tabsBackgroundSourceGlass);
-            } else {
-                tabsBackgroundSourceGlass = null;
-                tabsBackgroundDrawableFactory = new BlurredBackgroundDrawableViewFactory(tabsBackgroundSourceFrosted);
-            }
-            tabsBackgroundDrawableFactory.setLiquidGlassEffectAllowed(LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS));
-        } else {
-            scrollableViewNoiseSuppressor = null;
-            tabsBackgroundSourceFrosted = null;
-            tabsBackgroundSourceGlass = null;
-            tabsBackgroundDrawableFactory = new BlurredBackgroundDrawableViewFactory(tabsBackgroundSourceColor);
-        }
-        blur3Positions.add(blur3PositionActionBar);
-        blur3Positions.add(blur3PositionTabs);
+        tabsBackgroundSourceColor = new GlassSourceColor();
+        tabsBackgroundDrawableFactory = new BlurredBackgroundDrawableViewFactory(tabsBackgroundSourceColor);
     }
 
     @Override
@@ -288,7 +244,6 @@ public class BookmarkManagerActivity extends BaseFragment {
                     updateSwipeBackEnabled();
                     updateEmptyView();
                     invalidateGestureExclusion();
-                    updateBlur3Capture();
                 }
                 invalidateGlass();
             }
@@ -336,7 +291,6 @@ public class BookmarkManagerActivity extends BaseFragment {
         contentLayout.addView(tabsContainer, LayoutHelper.createFrameMarginPx(LayoutHelper.MATCH_PARENT, TABS_CONTAINER_HEIGHT_DP, Gravity.TOP, dp(4), topContentOffset, dp(4), 0));
         updateTabsStyle();
         setPageTab(viewPages[0], selectedTabId, false);
-        updateBlur3Capture();
         invalidateGlass();
         updateSwipeBackEnabled();
         updateEmptyView();
@@ -831,7 +785,6 @@ public class BookmarkManagerActivity extends BaseFragment {
     private class ViewPage extends FrameLayout {
         public final RecyclerListView listView;
         public final ListAdapter adapter;
-        public final IBlur3Capture blur3Capture;
         public final ArrayList<BookmarkChatItem> items = new ArrayList<>();
         public int tabId = TAB_ALL;
 
@@ -848,19 +801,10 @@ public class BookmarkManagerActivity extends BaseFragment {
             listView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && scrollableViewNoiseSuppressor != null) {
-                        scrollableViewNoiseSuppressor.onScrolled(dx, dy);
-                    }
                     invalidateGlass();
                 }
             });
             listView.addEdgeEffectListener(BookmarkManagerActivity.this::invalidateGlass);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && scrollableViewNoiseSuppressor != null && contentLayout != null) {
-                blur3Capture = new ViewGroupPartRenderer(listView, contentLayout, listView::drawChild);
-            } else {
-                blur3Capture = null;
-            }
 
             adapter = new ListAdapter(context, items);
             listView.setAdapter(adapter);
@@ -878,90 +822,16 @@ public class BookmarkManagerActivity extends BaseFragment {
 
     private void invalidateGlass() {
         if (contentLayout != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && scrollableViewNoiseSuppressor != null) {
-                blur3Invalidated = true;
-                contentLayout.invalidate();
-                actionBar.invalidate();
-            } else {
-                contentLayout.invalidateBlur();
-            }
+            contentLayout.invalidateBlur();
             if (tabsContainer != null) {
                 tabsContainer.invalidate();
             }
         }
     }
 
-    private boolean blur3_InvalidateBlur() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || scrollableViewNoiseSuppressor == null || blur3Capture == null || contentLayout == null || actionBar == null) {
-            return false;
-        }
-        if (!SharedConfig.chatBlurEnabled() || !BlurredBackgroundProviderImpl.checkBlurEnabled(currentAccount, resourceProvider)) {
-            return true;
-        }
-
-        final int width = contentLayout.getMeasuredWidth();
-        final int height = contentLayout.getMeasuredHeight();
-        final int actionBarHeight = actionBar.getMeasuredHeight();
-        if (width <= 0 || height <= 0 || actionBarHeight <= 0) {
-            return false;
-        }
-
-        final int additional = dp(48);
-        final int topContentOffset = getTopContentOffset();
-        final int tabsHeight = dp(TABS_CONTAINER_HEIGHT_DP);
-
-        blur3PositionActionBar.set(0, -additional, width, actionBarHeight + additional);
-        blur3PositionTabs.set(0, topContentOffset, width, topContentOffset + tabsHeight);
-        if (!LiteMode.isEnabled(LiteMode.FLAG_LIQUID_GLASS)) {
-            blur3PositionTabs.bottom += dp(48);
-        }
-
-        scrollableViewNoiseSuppressor.setupRenderNodes(blur3Positions, 2);
-        final boolean hasChanges = scrollableViewNoiseSuppressor.invalidateResultRenderNodes(blur3Capture, width, height);
-        if (hasChanges) {
-            if (tabsBackgroundSourceFrosted != null) {
-                tabsBackgroundSourceFrosted.invalidateDisplayListForDrawables();
-            }
-            if (tabsBackgroundSourceGlass != null) {
-                tabsBackgroundSourceGlass.invalidateDisplayListForDrawables();
-            }
-        }
-        return true;
-    }
-
     private class ContentLayout extends SizeNotifierFrameLayout {
         public ContentLayout(Context context) {
             super(context);
-        }
-
-        @Override
-        protected void dispatchDraw(@NonNull Canvas canvas) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && scrollableViewNoiseSuppressor != null && blur3Invalidated) {
-                if (blur3_InvalidateBlur()) {
-                    blur3Invalidated = false;
-                }
-            }
-            super.dispatchDraw(canvas);
-        }
-
-        @Override
-        public void drawBlurRect(Canvas canvas, float y, Rect rectTmp, Paint blurScrimPaint, boolean top) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || !SharedConfig.chatBlurEnabled() || tabsBackgroundSourceFrosted == null || !BlurredBackgroundProviderImpl.checkBlurEnabled(currentAccount, resourceProvider)) {
-                canvas.drawRect(rectTmp, blurScrimPaint);
-                return;
-            }
-
-            final boolean isThemeLight = resourceProvider != null ? !resourceProvider.isDark() : !Theme.isCurrentThemeDark();
-            final int blurAlpha = isThemeLight ? 216 : ACTION_BAR_BLUR_ALPHA;
-            canvas.save();
-            canvas.translate(0, -y);
-            tabsBackgroundSourceFrosted.draw(canvas, rectTmp.left, rectTmp.top + y, rectTmp.right, rectTmp.bottom + y);
-            canvas.restore();
-
-            final int oldScrimAlpha = blurScrimPaint.getAlpha();
-            blurScrimPaint.setAlpha(blurAlpha);
-            canvas.drawRect(rectTmp, blurScrimPaint);
-            blurScrimPaint.setAlpha(oldScrimAlpha);
         }
 
         @Override
@@ -1014,8 +884,7 @@ public class BookmarkManagerActivity extends BaseFragment {
                         additionalOffset = viewPages[0].getTranslationX();
                     }
                 }
-                updateBlur3Capture();
-                invalidateGlass();
+                        invalidateGlass();
                 if (tabsAnimation != null) {
                     tabsAnimation.removeAllListeners();
                     tabsAnimation.cancel();
@@ -1134,8 +1003,7 @@ public class BookmarkManagerActivity extends BaseFragment {
                                 selectedTabId = viewPages[0].tabId;
                                 tabsView.selectTabWithId(selectedTabId, 1.0f);
                             }
-                            updateBlur3Capture();
-                            invalidateGlass();
+                                    invalidateGlass();
                             tabsAnimationInProgress = false;
                             maybeStartTracking = false;
                             startedTracking = false;

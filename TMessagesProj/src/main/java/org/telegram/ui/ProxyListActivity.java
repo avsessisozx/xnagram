@@ -414,7 +414,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         });
 
         // na: action bar menu
-        ActionBarMenu menu = actionBar.createMenu();
+        SimpleActionBarMenu menu = simpleActionBar.createMenu();
         otherItem = menu.addItem(na_menu_other, R.drawable.ic_ab_other);
         otherItem.setContentDescription(LocaleController.getString("AccDescrMoreOptions", R.string.AccDescrMoreOptions));
         otherItem.addSubItem(na_menu_add_input_telegram, LocaleController.getString("AddProxyTelegram", R.string.AddProxyTelegram)).setOnClickListener((v) -> presentFragment(new ProxySettingsActivity()));
@@ -451,7 +451,6 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                             }
                         }
                         if (SharedConfig.currentProxy == null) {
-                            useProxyForCalls = false;
                             useProxySettings = false;
                         }
                         NotificationCenter.getGlobalInstance().removeObserver(ProxyListActivity.this, NotificationCenter.proxySettingsChanged);
@@ -461,7 +460,6 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                         if (listAdapter != null) {
                             if (SharedConfig.currentProxy == null) {
                                 listAdapter.notifyItemChanged(useProxyRow, ListAdapter.PAYLOAD_CHECKED_CHANGED);
-                                listAdapter.notifyItemChanged(callsRow, ListAdapter.PAYLOAD_CHECKED_CHANGED);
                             }
                             listAdapter.clearSelected();
                         }

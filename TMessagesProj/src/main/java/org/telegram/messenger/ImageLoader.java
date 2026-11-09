@@ -4667,7 +4667,7 @@ public class ImageLoader {
                     Bitmap bitmap = ImageLoader.loadBitmap(file.getPath(), null, targetWidth, targetHeight, false);
                     if (bitmap != null) {
                         Utilities.blurBitmap(bitmap, 3);
-                        Bitmap scaledBitmap = Bitmaps.createScaledBitmap(bitmap, targetWidth, targetHeight, true);
+                        Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, targetWidth, targetHeight, true);
                         if (scaledBitmap != bitmap) {
                             bitmap.recycle();
                             bitmap = scaledBitmap;
@@ -4708,7 +4708,7 @@ public class ImageLoader {
                         Bitmap b = getStrippedPhotoBitmap(size.bytes, null);
                         if (b != null) {
                             Utilities.blurBitmap(b, 3);
-                            Bitmap scaledBitmap = Bitmaps.createScaledBitmap(b, targetWidth, targetHeight, true);
+                            Bitmap scaledBitmap = Bitmap.createScaledBitmap(b, targetWidth, targetHeight, true);
                             if (scaledBitmap != b) {
                                 b.recycle();
                                 b = scaledBitmap;

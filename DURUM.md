@@ -59,3 +59,11 @@ Yayinlandi: GitHub Release v1261 (main, kalici imza, arm64 APK). CI gecti.
 Dogrulandi: kalici anahtarla derleme; Release olustu; silinen mesaj kaydetme ayarlari gizlendi + kapaliya zorlandi (kodda, cihazda denenmedi).
 Dogrulanmadi: ceviri butonu (giris gerekir), GitHub guncelleme dialogu (daha yeni surum yok), push bildirimi (calismaz).
 Yapilacak: test-N on-surumlerini sil, 2. surum (Telegram taban yamalari).
+
+
+## Telegram 13.2.1 birleştirme araştırması (2026-11-09, doğrulandı: git ile ölçüldü)
+- Bizim taban: resmi Telegram 12.10.0 (7031), TL katmanı 229. Resmi master: 13.2.1 (7291, 07.11.2026), katman 233. (Resmi `dev` dalı 2021'den kalma, kullanılmaz; `master` kullanılır.)
+- Yöntem: gelistirme ağacını resmi 12.10.0 commit'inin (4e1a61eca) üstüne sentetik commit yapıp `git merge upstream/master` denendi. Sonuç: ~127 içerik çakışması + ~59 sil/değiştir çakışması. En ağırlar: ChatActivity (26 parça), ChatMessageCell (23), SettingsActivity (12), ProfileActivity/DialogsActivity/ChatActivityEnterView (9).
+- Resmi taraf yapıyı değiştirmiş: yeni alt modüller (boringssl, td, absl, wamr, openh264, libyuv, TMessagesProj_Modules/media), TLRPC artık buildSrc/tlrpc ile üretiliyor, native dizin düzeni farklı.
+- Yerelde derleme yok (sandbox); doğrulama yalnız GitHub Actions'ta. Hiçbir şey push edilmedi, ana dallar değişmedi.
+- Doğrulanmadı: kanal sorununun gerçek nedeni (katman farkı olması en olası, kanıtlanmadı).

@@ -233,6 +233,10 @@ android {
     namespace = 'org.telegram.messenger'
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['-Xmaxerrs', '10000', '-Xmaxwarns', '0']
+}
+
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_21)

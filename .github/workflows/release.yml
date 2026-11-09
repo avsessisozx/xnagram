@@ -83,6 +83,13 @@ jobs:
       - name: "IMZA: GECICI anahtar (secret bulunamadi)"
         if: steps.signing.outputs.kind != 'stable'
         run: echo "Secret yok, gecici anahtar kullaniliyor."
+      - name: Prefetch Gradle (retry on download errors)
+        run: |
+          for i in 1 2 3 4 5 6; do
+            ./gradlew --version && exit 0
+            echo "Gradle indirme hatasi, tekrar deneniyor ($i)"; sleep 30
+          done
+          exit 1
       - name: Release Build
         id: build
         env:

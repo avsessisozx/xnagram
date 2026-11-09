@@ -67,3 +67,12 @@ Yapilacak: test-N on-surumlerini sil, 2. surum (Telegram taban yamalari).
 - Resmi taraf yapıyı değiştirmiş: yeni alt modüller (boringssl, td, absl, wamr, openh264, libyuv, TMessagesProj_Modules/media), TLRPC artık buildSrc/tlrpc ile üretiliyor, native dizin düzeni farklı.
 - Yerelde derleme yok (sandbox); doğrulama yalnız GitHub Actions'ta. Hiçbir şey push edilmedi, ana dallar değişmedi.
 - Doğrulanmadı: kanal sorununun gerçek nedeni (katman farkı olması en olası, kanıtlanmadı).
+
+
+## 2026-11-09 · Telegram 13.2.1 (7291, katman 233) birleştirildi — sürüm 13.2.1 / kod 1262
+- Dal: `gelistirme` (commit ee72633). main'e ALINMADI; telefonda denenmedi.
+- Doğrulandı: GitHub Actions derlemesi başarılı (test-16 ön sürümü, geçici imzalı arm64 APK).
+- Doğrulanmadı: telefonda çalışma, kanalların açılması, giriş, medya oynatma (media3), arama.
+- Derleme yığını resmî Telegram'a çekildi: AGP 8.13.2, Gradle 8.13, Kotlin 2.2.20, media3 alt modülü, yeni native alt modüller. compileSdk 36; AAR metadata kontrolü kapalı (unifiedpush/okhttp5/translator compileSdk 37 istiyor).
+- Kaybolan/değişen Nagram özellikleri: ChatActivity yazı biçimi menüsünde Nagram'ın kod/bahsetme/çeviri girişleri; profil adı uzun basıp kopyalama; canlı bulanık (blur3) arka planlar (Bookmarks, AyuViewDeleted, NekoDelegateFragment sayfaları düz/cam kaynağa döndü); özel ses bitrate (voip) yaması; ProxyList'te aramalar için proxy sıfırlaması; resmî `webrtc_voice_engine.cc` kullanılıyor.
+- Sonraki: telefonda dene → sorun varsa log; sonra main'e al ve kalıcı anahtarla yayınla.

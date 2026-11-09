@@ -76,3 +76,14 @@ Yapilacak: test-N on-surumlerini sil, 2. surum (Telegram taban yamalari).
 - Derleme yığını resmî Telegram'a çekildi: AGP 8.13.2, Gradle 8.13, Kotlin 2.2.20, media3 alt modülü, yeni native alt modüller. compileSdk 36; AAR metadata kontrolü kapalı (unifiedpush/okhttp5/translator compileSdk 37 istiyor).
 - Kaybolan/değişen Nagram özellikleri: ChatActivity yazı biçimi menüsünde Nagram'ın kod/bahsetme/çeviri girişleri; profil adı uzun basıp kopyalama; canlı bulanık (blur3) arka planlar (Bookmarks, AyuViewDeleted, NekoDelegateFragment sayfaları düz/cam kaynağa döndü); özel ses bitrate (voip) yaması; ProxyList'te aramalar için proxy sıfırlaması; resmî `webrtc_voice_engine.cc` kullanılıyor.
 - Sonraki: telefonda dene → sorun varsa log; sonra main'e al ve kalıcı anahtarla yayınla.
+
+
+## 2026-11-09 akşam · LOC_ERR düzeltmesi + CI doğrulaması (gelistirme, commit 45e351ca; sürüm 13.2.1 / kod 1262)
+- Neden: Telegram 13.2.1'in yeni yazı sistemi yalnızca values/strings.xml ve values-*/strings.xml okuyor; Nagram'ın strings_na/nax/neko.xml dosyaları sözlüğe girmiyordu (Türkçe çeviriler dahil). Dil listesini üreten TelegramBuildPlugin de aynı filtreyi kullanıyordu.
+- Düzeltme: TelegramBuildAppPlugin.kt ve TelegramBuildPlugin.kt filtreleri strings*.xml; TelegramStringsTask dosyaları sıralıyor; NagramX/SettingsNax/AccountSettingsNax (manifest/xml'den kullanılıyor) kaynak küçültmeden korunuyor.
+- Doğrulandı (CI, gerçek APK): .github/scripts/verify_localization.py: localization_en.bin 12287/12287 anahtar, string_resource_ids.bin içinde hepsi, tr-TR 712 çeviri tamam, aapt2 etiketi XNagram. Emülatör (Android 12): uygulama çalışıyor, çökme yok, ekranda LOC_ERR yok (yalnız karşılama ekranı görülüyor).
+- Doğrulanmadı: giriş yapılmış uygulamada Nagram ayar ekranları (hesap gerekir); telefonda deneme; kanal sorunu; telefon numarası/SMS girişi.
+- APK: ön sürüm test-29, XNagram-13.2.1-45e351c-1262-arm64-v8a.apk (58,4 MB, geçici imza; v1262 üstüne kurulmaz).
+- Açık: APK ~7,5 MB büyüdü (önceki test sürümleri ~50,9 MB), nedeni araştırılmadı. verCode 1262; main'e almadan 1263 yapılmalı. .github/scripts/__pycache__ yanlışlıkla commit'e girdi, silinecek.
+- Giriş/emoji.pack: EmojiPack.java 13.2.1 ile yeni; sıkıştırılmış asset'te openFd hata verir, statik başlatma hatası Emoji.java:166'daki catch(Exception) ile yakalanmaz. Düzeltme 33a6ebd2 (noCompress); CI'da emoji.pack Stored. LoginActivity'de Nagram bağlantıları v1261 ile aynı (17). CI derlemesi APP_ID 6 kullanıyor (build.gradle:143), kendi API ID'miz yok.
+- Devam noktası: sırada (1) APK boyut farkı, (2) kaybolan Nagram özellikleri tek tek (ChatActivity yazı biçimi menüsü, profil adı kopyalama, blur arka planlar, ses bitrate yaması, proxy sıfırlama), (3) girişi kullanıcı hesabıyla bir kez deneme.

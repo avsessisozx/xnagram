@@ -249,3 +249,10 @@
 -keepattributes *Annotation*
 -dontoptimize
 -dontobfuscate
+
+# Native methods registered via RegisterNatives must never be removed or renamed
+-keep class org.telegram.utils.twidget.WidgetSandboxNative { *; }
+-keep class org.telegram.utils.twidget.WidgetSandboxBackend { *; }
+-keepclasseswithmembers,includedescriptorclasses class * {
+    native <methods>;
+}

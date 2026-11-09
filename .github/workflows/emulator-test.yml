@@ -2,6 +2,9 @@ name: Emulator Test
 
 on:
   workflow_dispatch:
+  push:
+    branches: [gelistirme]
+    paths: ['.github/workflows/emulator-test.yml', '.github/scripts/emu_test.sh']
 
 permissions:
   contents: read

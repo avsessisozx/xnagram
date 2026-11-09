@@ -1,21 +1,35 @@
 import java.nio.file.Paths
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.gradle.internal.os.OperatingSystem
 
 plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
-    id 'org.telegram.lottie-meta'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.telegram.build-plugin'
+    id 'org.telegram.build-app-plugin'
     id 'idea'
 }
 
 idea {
     module {
         excludeDirs += [
-            file('jni/third_party'),
-            file('jni/ffmpeg'),
+            file('jni/td'),
+            file('jni/third_party/absl'),
+            file('jni/third_party/boringssl'),
+            file('jni/third_party/dav1d'),
+            file('jni/third_party/ffmpeg'),
+            file('jni/third_party/libvpx'),
+            file('jni/third_party/libyuv'),
+            file('jni/third_party/openh264'),
+            file('jni/third_party/xiph'),
+            file('jni/third_party/wamr'),
+            file('jni/third_party/libprisma'),
+            file('jni/third_party/boost-regex'),
+            file('jni/tgcalls'),
             file('jni/tlottie'),
-            file('jni/boringssl'),
+            file('jni/voip/webrtc'),
             file('jni/sqlite')
         ]
     }
@@ -24,7 +38,7 @@ idea {
 def buildTimestamp = System.getenv('BUILD_TIMESTAMP') ?: '0'
 def commitId = System.getenv('COMMIT_ID')
 def verName = "${APP_VERSION_NAME}${commitId?.take(7) ? "-${commitId.take(7)}" : ''}"
-def verCode = 1261
+def verCode = 1262
 
 def officialVer = APP_VERSION_NAME
 def officialCode = APP_VERSION_CODE
@@ -68,7 +82,28 @@ if (nativeTarget == 'SKIP') {
 }
 
 android {
+    compileSdk = 36
+    buildToolsVersion = '36.0.0'
+    ndkVersion = '27.2.12479018'
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+        coreLibraryDesugaringEnabled = true
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    lint {
+        checkReleaseBuilds = false
+        disable 'MissingTranslation', 'ExtraTranslation', 'BlockedPrivateApi'
+    }
+
     defaultConfig.applicationId = APP_PACKAGE
+    defaultConfig.minSdk = 27
+    defaultConfig.targetSdk = 36
 
     androidResources {
         localeFilters += [
@@ -122,6 +157,7 @@ android {
         externalNativeBuild {
             cmake {
                 arguments '-DANDROID_STL=c++_static', '-DANDROID_PLATFORM=android-27', '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
+                targets 'tmessages.49'
                 System.getenv('PATH').split(File.pathSeparator).any { path ->
                     var file = Paths.get("${path}${File.separator}ccache${if (OperatingSystem.current().windows) ".exe" else ""}").toFile()
                     if (file.exists()) {
@@ -194,9 +230,13 @@ android {
         }
     }
 
-    sourceSets.main.jniLibs.srcDirs = ['./jni/']
-
     namespace = 'org.telegram.messenger'
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+    }
 }
 
 androidComponents {
@@ -231,13 +271,19 @@ dependencies {
     implementation 'androidx.sharetarget:sharetarget:1.2.0'
     implementation 'androidx.interpolator:interpolator:1.0.0'
     implementation 'androidx.biometric:biometric:1.1.0'
+    implementation 'androidx.webkit:webkit:1.14.0'
+    implementation 'com.neovisionaries:nv-websocket-client:2.14'
     implementation 'androidx.car.app:app:1.7.0'
     implementation 'androidx.car.app:app-projected:1.7.0'
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
     compileOnly 'org.checkerframework:checker-qual:2.5.2'
     compileOnly 'org.checkerframework:checker-compat-qual:2.5.0'
-    implementation 'com.google.firebase:firebase-messaging:25.1.2'
-    implementation 'com.google.firebase:firebase-crashlytics:20.1.0'
+    // Pinned like official Telegram: 34.19.0 is the last Firebase BoM for minSdk 23.
+    api platform('com.google.firebase:firebase-bom:34.19.0')
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-pnv'
+    implementation 'com.google.firebase:firebase-appindexing:20.0.0'
     implementation 'com.google.android.gms:play-services-cast-framework:22.3.1'
     implementation 'com.google.android.gms:play-services-maps:20.0.0'
     implementation 'com.google.android.gms:play-services-auth:21.6.0'
@@ -264,12 +310,21 @@ dependencies {
     implementation "io.noties.markwon:ext-tables:4.6.2"
     implementation "io.noties.markwon:html:4.6.2"
     implementation "io.noties.markwon:inline-parser:4.6.2"
-    implementation "io.noties.markwon:ext-latex:4.6.2"
+    implementation("io.noties.markwon:ext-latex:4.6.2") {
+        exclude group: 'ru.noties', module: 'jlatexmath-android'
+    }
+    api project(':jlatexmath')
+    // media3 (official Telegram moved from vendored ExoPlayer2 to a media3 submodule)
+    api project(":TMessagesProj_Modules:media3:media-lib-exoplayer")
+    api project(":TMessagesProj_Modules:media3:media-lib-exoplayer-dash")
+    api project(":TMessagesProj_Modules:media3:media-lib-exoplayer-hls")
+    api project(":TMessagesProj_Modules:media3:media-lib-decoder-ffmpeg")
+    api project(":TMessagesProj_Modules:media3:media-lib-session")
     // payment
     implementation('com.stripe:stripe-android:2.0.2') {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
-    implementation 'com.android.billingclient:billing:7.1.1'
+    implementation 'com.android.billingclient:billing:8.0.0'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs_nio:2.1.5'
 
     // kotlin

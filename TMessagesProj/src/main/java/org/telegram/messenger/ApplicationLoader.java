@@ -324,6 +324,10 @@ public class ApplicationLoader extends Application {
 
         super.onCreate();
         installCrashReportFilter();
+        try {
+            CrashReporter.checkAndReport(applicationContext);
+        } catch (Throwable ignore) {
+        }
 
         // AndroidUtilities must be initialized before FileLog
         final String helloWorld = AndroidUtilities.getHelloWorld();

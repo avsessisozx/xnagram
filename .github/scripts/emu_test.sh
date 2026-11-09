@@ -13,5 +13,9 @@ echo "=== CRASH BUFFER ===" ; adb logcat -d -b crash | tee emu_logs/crash.txt | 
 echo "=== FATAL / signal ===" ; grep -nE "FATAL EXCEPTION|AndroidRuntime|Fatal signal|SIGSEGV|SIGABRT|UnsatisfiedLink|ClassNotFound|NoSuchMethod|NoClassDefFound|Process .* has died" emu_logs/full.txt | head -40
 echo "=== focused window ===" ; adb shell dumpsys window | grep -E "mCurrentFocus" | head -2
 adb exec-out screencap -p > emu_logs/screen.png
+PID=$(adb shell pidof $PKG | tr -d '\r')
+echo "=== APP PID LOG ($PID) ==="; adb logcat -d --pid=$PID | cut -c1-300 | grep -vE " (D|V) " | head -120
+echo "=== TOP ACTIVITY ==="; adb shell dumpsys activity activities | grep -E "topResumedActivity|ResumedActivity" | head -3
+echo "=== UI TEXT ==="; adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1; adb shell cat /sdcard/ui.xml | grep -oE 'text="[^"]+"' | head -20
+echo "=== libs in apk ==="; unzip -l "$APK" | grep -E "\.so$" | awk '{print $4}' | head -30
 exit 0
-# retry

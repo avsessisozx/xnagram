@@ -6,7 +6,9 @@ Mirrors what the app does at runtime (see Localization.java):
              -> assets/localization_<lang>.bin (name hash -> value)
 A name missing from either table shows up in the UI as LOC_ERR.
 
-Usage: verify_localization.py <apk> <res-dir>   (res-dir = TMessagesProj/src/main/res)
+Usage: verify_localization.py <apk> <res-dir> [LocalizationUtils.java]
+  res-dir = TMessagesProj/src/main/res. With the generated LocalizationUtils.java the
+  locale -> asset mapping is simulated too (Locale("tr") must find the Turkish asset).
 Exit code 0 = all good, 1 = problems found.
 """
 import glob
@@ -136,6 +138,33 @@ def main():
             problems.append(f"{tag}: {len(miss)}/{len(expected)} strings missing, e.g. {miss[:6]}")
         else:
             print(f"language {tag}: {len(expected)} strings ok")
+
+    # locale -> asset resolution (mirrors the generated LocalizationUtils.getLocalizationAsset)
+    if len(sys.argv) > 3:
+        src = open(sys.argv[3], encoding="utf-8").read()
+        head, _, tail = src.partition("final String language")
+        exact = dict(re.findall(r'case "([^"]+)": return "([^"]+)";', head))
+        by_lang = dict(re.findall(r'case "([^"]+)": return "([^"]+)";', tail))
+
+        def resolve(tag, language):
+            return exact.get(tag) or by_lang.get(language)
+
+        names_by_lang = {}
+        for tag, files in tags.items():
+            for f in files:
+                names_by_lang.setdefault(tag.split("-")[0], set()).update(string_names(f))
+        for lang, expected in sorted(names_by_lang.items()):
+            asset_file = resolve(lang, lang)
+            if asset_file is None:
+                problems.append(f"Locale('{lang}') finds NO asset (would show English / LOC_ERR)")
+                continue
+            raw = asset(asset_file)
+            loc = read_localization(raw) if raw is not None else {}
+            miss = [n for n in expected if java_hash(n) not in loc]
+            if miss:
+                problems.append(f"Locale('{lang}') -> {asset_file}: {len(miss)} strings missing, e.g. {miss[:5]}")
+            else:
+                print(f"locale '{lang}' -> {asset_file}: all {len(expected)} strings reachable")
 
     # Turkish must really be translated (not just the English text)
     tr = asset(asset_name("tr-TR"))

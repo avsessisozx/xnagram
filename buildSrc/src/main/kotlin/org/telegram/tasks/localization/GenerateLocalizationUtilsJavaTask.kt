@@ -87,14 +87,26 @@ abstract class GenerateLocalizationUtilsJavaTask : DefaultTask() {
                 java.appendLine()
                 java.appendLine("        switch (language) {")
 
+                // XNagram: language-only locales (the app uses Locale("tr") for Turkish) must
+                // also find region-only directories such as values-tr-rTR, otherwise the
+                // Nagram translations are never used. Plain tags win, then the first region.
+                val languageFallbacks = sortedMapOf<String, String>()
                 for (tag in languageTags) {
                     if (!tag.contains('-')) {
-                        java.append("            case \"")
-                        java.append(escapeJavaString(tag))
-                        java.append("\": return \"")
-                        java.append(getLocalizationAssetName(tag))
-                        java.appendLine("\";")
+                        languageFallbacks[tag] = tag
                     }
+                }
+                for (tag in languageTags) {
+                    if (tag.contains('-')) {
+                        languageFallbacks.putIfAbsent(tag.substringBefore('-'), tag)
+                    }
+                }
+                for ((language, tag) in languageFallbacks) {
+                    java.append("            case \"")
+                    java.append(escapeJavaString(language))
+                    java.append("\": return \"")
+                    java.append(getLocalizationAssetName(tag))
+                    java.appendLine("\";")
                 }
 
                 java.appendLine("            default: return null;")

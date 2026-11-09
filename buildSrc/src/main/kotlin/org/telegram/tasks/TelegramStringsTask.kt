@@ -332,6 +332,19 @@ abstract class TelegramStringsTask : DefaultTask() {
                 .add(file)
         }
 
+        // XNagram: a language-only locale (e.g. "es") is served by the plain asset, so the
+        // Nagram strings that live in region directories (values-es-rES) are merged into it.
+        val regionExtras = linkedMapOf<String, MutableList<File>>()
+        for ((languageTag, files) in localizedFilesByTag) {
+            val plain = languageTag.substringBefore('-')
+            if (plain != languageTag && localizedFilesByTag.containsKey(plain)) {
+                regionExtras.getOrPut(plain) { ArrayList() }.addAll(files)
+            }
+        }
+        for ((plain, files) in regionExtras) {
+            localizedFilesByTag.getValue(plain).addAll(files)
+        }
+
         for ((languageTag, files) in localizedFilesByTag) {
             addLocalization(
                 files = files,

@@ -104,7 +104,10 @@ jobs:
       - name: Verify localization tables in APK
         run: |
           APK=$(ls TMessagesProj/build/outputs/apk/release/*x86_64*.apk | head -1)
-          python3 .github/scripts/verify_localization.py "$APK" TMessagesProj/src/main/res
+          LU=$(find TMessagesProj/build buildSrc/build build -name LocalizationUtils.java -path '*elease*' 2>/dev/null | head -1)
+          echo "LocalizationUtils: $LU"
+          test -n "$LU"
+          python3 .github/scripts/verify_localization.py "$APK" TMessagesProj/src/main/res "$LU"
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules

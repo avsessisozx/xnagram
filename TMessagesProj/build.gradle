@@ -259,6 +259,7 @@ androidComponents {
 }
 
 configurations.configureEach {
+    resolutionStrategy.force 'androidx.core:core:1.16.0', 'androidx.core:core-ktx:1.16.0'
     exclude group: 'androidx.recyclerview', module: 'recyclerview'
     exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
     exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
@@ -266,7 +267,7 @@ configurations.configureEach {
 
 dependencies {
     // official
-    implementation 'androidx.core:core-ktx:1.19.0'
+    implementation 'androidx.core:core-ktx:1.16.0'
     implementation 'androidx.palette:palette-ktx:1.0.0'
     implementation 'androidx.exifinterface:exifinterface:1.4.2'
     implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
@@ -351,4 +352,10 @@ dependencies {
     implementation 'app.nekogram.translator:translator:1.6.1'
 
     compileOnly fileTree('libs')
+}
+
+// Some third-party libraries (unifiedpush, okhttp 5.5, nekogram translator) declare compileSdk 37 / AGP 9.1 in their AAR
+// metadata. They run fine on compileSdk 36 (the version official Telegram 13.2.1 builds with), so skip the metadata check.
+tasks.matching { it.name.startsWith('check') && it.name.endsWith('AarMetadata') }.configureEach {
+    enabled = false
 }

@@ -5799,6 +5799,16 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         nameTextView.setPivotX(0);
         nameTextView.setPivotY(0);
         nameTextView.setScrollNonFitText(true);
+        // Nagram: long-press on the name copies it
+        nameTextView.setOnLongClickListener(v -> {
+            try {
+                AndroidUtilities.addToClipboard(((SimpleTextView) v).getText());
+                Toast.makeText(getParentActivity(), getString(R.string.TextCopied), Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                FileLog.e(e);
+            }
+            return false;
+        });
         nameTextView.setFocusable(true);
         nameTextView.setEllipsizeByGradient(true);
         avatarContainer2.addView(nameTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 109, -6, 0, 0));

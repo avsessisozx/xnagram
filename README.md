@@ -1,5 +1,7 @@
 # XNagram
 
+> ⬇️ **İndir:** [Son sürüm](https://github.com/avsessisozx/xnagram/releases/latest) (`arm64-v8a.apk` dosyasını seç)
+
 Telegram için, [Nagram X](https://github.com/risin42/NagramX) tabanlı, kişisel kullanım amaçlı bir Android istemci forku. Resmi bir Telegram uygulaması değildir ve Telegram ile bağlantısı yoktur.
 
 *English: a personal fork of Nagram X (Telegram client for Android) with a persistent translate button and its own update channel. Not affiliated with Telegram.*
